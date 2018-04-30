@@ -13,7 +13,7 @@ dtype = {
 }
 
 print('loading train data...')
-df = pd.read_csv('train_sample.csv', dtype=dtype, usecols=dtype.keys(), parse_dates=['click_time'])
+df = pd.read_csv('train.csv', dtype=dtype, usecols=dtype.keys(), parse_dates=['click_time'])
 print('Done')
 
 # times
@@ -118,4 +118,4 @@ for i, cols in enumerate(next_click_combinations):
     print(i, cols)
     df = next_click(df, cols)
 
-df.to_csv('train_features.csv', index=False)
+df.to_feather('train_features.ftr')

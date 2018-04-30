@@ -3,10 +3,9 @@ import pandas as pd
 import lightgbm as lgb
 import gc
 
-df = pd.read_feather('train_features.ftr')
 
-train = df[df.day != 9]
-valid = df[df.day == 9]
+train = pd.read_hdf('train_features.h5', 'train_features')
+valid = pd.read_hdf('valid_features.h5', 'valid_features')
 
 
 print('train: ', train.shape, 'valid: ', valid.shape)
