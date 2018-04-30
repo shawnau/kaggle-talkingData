@@ -3,7 +3,7 @@ import pandas as pd
 import lightgbm as lgb
 import gc
 
-df = pd.read_csv('nextClick_180w.csv')
+df = pd.read_feather('train_features.ftr')
 
 train = df[df.day != 9]
 valid = df[df.day == 9]
@@ -36,7 +36,7 @@ lgb_params = {
 }
 
 
-features = [x for x in train.columns if x not in ['click_time', 'is_attributed']]
+features = [x for x in train.columns if x not in ['index', 'click_time', 'is_attributed']]
 categorical = ['ip','app', 'device', 'os', 'channel', 'hour']
 respond = 'is_attributed'
 
