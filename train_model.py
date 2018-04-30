@@ -1,41 +1,16 @@
-
-# coding: utf-8
-
-# In[1]:
-
-
 import numpy as np
 import pandas as pd
 import lightgbm as lgb
 import gc
 
-
-# In[2]:
-
-
 df = pd.read_csv('nextClick_180w.csv')
-
-
-# In[3]:
-
 
 train = df[df.day != 9]
 valid = df[df.day == 9]
 
 
-# In[4]:
-
-
-train.shape, valid.shape
-
-
-# In[5]:
-
-
-train.columns
-
-
-# In[6]:
+print('train: ', train.shape, 'valid: ', valid.shape)
+print('features: ', train.columns)
 
 
 lgb_params = {
@@ -61,9 +36,6 @@ lgb_params = {
 }
 
 
-# In[10]:
-
-
 features = [x for x in train.columns if x not in ['click_time', 'is_attributed']]
 categorical = ['ip','app', 'device', 'os', 'channel', 'hour']
 respond = 'is_attributed'
@@ -78,9 +50,6 @@ xgvalid = lgb.Dataset(valid[features].values,
                       feature_name=features,
                       categorical_feature=categorical
                      )
-
-
-# In[11]:
 
 
 params = {
@@ -99,11 +68,7 @@ params = {
 lgb_params.update(params)
 
 
-# In[12]:
-
-
 evals_results = {}
-
 bst = lgb.train(lgb_params, 
                  xgtrain, 
                  valid_sets=[xgvalid], 
@@ -115,23 +80,14 @@ bst = lgb.train(lgb_params,
                  feval=None)
 
 
-# In[13]:
-
-
 print("\nModel Report")
 print("bst1.best_iteration: ", bst.best_iteration)
 print('auc'+":", evals_results['valid']['auc'][bst.best_iteration-1])
 
 
-# In[14]:
-
-
 gain = bst.feature_importance('gain')
 ft = pd.DataFrame({'feature':bst.feature_name(), 'split':bst.feature_importance('split'), 'gain':100 * gain / gain.sum()}).sort_values('gain', ascending=False)
 ft.to_csv('nextClick_importance.csv',index=False)
-
-
-# In[ ]:
 
 
 
