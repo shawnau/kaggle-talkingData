@@ -27,8 +27,8 @@ df['click_time'] = (df['click_time'].astype(np.int64) // 10 ** 9).astype(np.int3
 print('Done')
 
 # train/valid
-#df = df[df.day != 9]
-df = df[df.day == 9]
+df = df[df.day != 9]
+#df = df[df.day == 9]
 print('dataset: ', df.shape)
 gc.collect()
 
@@ -63,12 +63,21 @@ def next_click(df, group_cols):
 
 # count agg features
 count_combinations = [
-    ['app'], # 37
-    ['ip'],  # 4
+    # ['app', 'channel', 'os']，
+    # ['device', 'os']，
+    # ['ip', 'os', 'day', 'hour']，
+    # ['ip', 'app', 'day', 'hour']，
+    # ['ip', 'device', 'day', 'hour']，
+    # ['ip', 'app', 'os']，
+    # ['app', 'day', 'hour']，
+    ['ip', 'day', 'hour'],
+    ['ip', 'app'],
+    ['app'], # 7.2
+    ['ip'],  # 3.1
     ['ip', 'device'], # 0.53
-    ['app', 'channel'], # 0.51
-    ['app', 'channel', 'day'], # 0.50
-    ['app', 'channel', 'day', 'hour'] # 0.33
+    ['app', 'channel'], # 2.6
+    # ['app', 'channel', 'day'], # 0.08
+    ['app', 'channel', 'day', 'hour'] # 0.68
 ]
 for i, cols in enumerate(count_combinations):
     print(i, cols)
@@ -77,12 +86,13 @@ for i, cols in enumerate(count_combinations):
 
 # accumulate count agg features
 countAccum_combinations = [
-    ['app'], # 7
-    ['app', 'channel'], # 3.5
-    ['ip'], # 2.5
-    ['device', 'channel', 'day', 'hour'], # 0.59
-    ['app', 'device', 'day', 'hour'], # 0.39
-    ['app', 'channel', 'day', 'hour'] # 0.34
+    ['ip', 'device', 'os'],
+    ['app'], # 0.088
+    #['app', 'channel'], # 0.045
+    ['ip'] # 0.081
+    # ['device', 'channel', 'day', 'hour'], # 0.02
+    # ['app', 'device', 'day', 'hour'], # 0.04
+    # ['app', 'channel', 'day', 'hour'] # 0.03
 ]
 for i, cols in enumerate(countAccum_combinations):
     print(i, cols)
@@ -91,14 +101,18 @@ for i, cols in enumerate(countAccum_combinations):
 
 # unique count agg features
 countUniq_combinations = [
-    [['app'], 'ip'], # 10
+    # [['ip', 'device', 'os'], 'app'],
+    # [['ip', 'day'], 'hour'],
+    # [['ip'], 'device'],
+    # [['app'], 'channel'],
+    # [['app'], 'ip'], # 0.09
     [['app', 'day'], 'ip'], # 3
     [['app', 'channel', 'hour'], 'os'], # 2
-    [['ip'], 'channel'], # 1.8
-    [['ip'], 'app'], # 1.5
-    [['app', 'channel', 'day', 'hour'], 'os'], # 1.1
-    [['app', 'device', 'channel'], 'ip'], # 0.77
-    [['ip'], 'hour'], # 0.71
+    [['ip'], 'channel'], # 0.9
+    [['ip'], 'app'], # 1.3
+    [['app', 'channel', 'day', 'hour'], 'os'], # 9.31
+    # [['app', 'device', 'channel'], 'ip'], # 0.06
+    # [['ip'], 'hour'], # 0.08
     [['ip'], 'os'] # 0.45
 ]
 for i, cols in enumerate(countUniq_combinations):
@@ -108,12 +122,15 @@ for i, cols in enumerate(countUniq_combinations):
 
 # next click features
 next_click_combinations = [
+    ['ip', 'app', 'device', 'os', 'channel'],
+    ['ip', 'os', 'device'],
+    ['ip', 'os', 'device', 'app'],
     ['app', 'channel'], # 3.3
     ['ip'], # 1.8
-    ['channel'], # 1.3
-    ['ip', 'device'], # 0.75
-    ['channel', 'day'], # 0.61
-    ['app'] # 0.41
+    # ['channel'], # 1.3 0.000978
+    ['ip', 'device'] # 0.75
+    # ['channel', 'day'], # 0.61 0.001321
+    # ['app'] # 0.41 0.000459
 ]
 for i, cols in enumerate(next_click_combinations):
     print(i, cols)
@@ -123,5 +140,5 @@ del df['click_time']
 gc.collect()
 
 print('dumping...')
-df.to_feather('data/valid_features.ftr')
+df.to_feather('data/train_features.ftr')
 print('done')

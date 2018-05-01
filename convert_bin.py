@@ -23,6 +23,10 @@ xgtrain = lgb.Dataset(train[features].values,
 
 xgvalid = xgtrain.create_valid(valid[features].values, 
                                label=valid[respond].values)
+# bug?
+xgvalid.feature_name = features
+xgvalid.categorical_feature = categorical
+
 
 print('dump to bin...')
 xgtrain.save_binary('data/train_features.bin')
