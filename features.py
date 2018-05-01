@@ -1,6 +1,7 @@
 import itertools
 import numpy as np
 import pandas as pd
+import gc
 
 dtype = {
     'ip': np.int32,
@@ -13,7 +14,7 @@ dtype = {
 }
 
 print('loading train data...')
-df = pd.read_csv('train.csv', dtype=dtype, usecols=dtype.keys(), parse_dates=['click_time'])
+df = pd.read_csv('train_sample.csv', dtype=dtype, usecols=dtype.keys(), parse_dates=['click_time'])
 print('Done')
 
 # times
@@ -30,34 +31,38 @@ def count_agg(df, group_cols):
     col_name = "_".join(group_cols)+'_count'
     count = df.groupby(group_cols).size().reset_index(name=col_name)
     df = df.merge(count, on=group_cols, how='left')
+    del count
+    gc.collect()
     return df
 
 def count_cum(df, group_cols):
     col_name = "_".join(group_cols)+'_countAccum'
     df[col_name] = df.groupby(group_cols).cumcount()
+    gc.collect()
     return df
 
 def count_uniq(df, group_cols, uniq_col):
     col_name = "_".join(group_cols)+'_uniq_'+uniq_col+'_countUniq'
     tmp = df.groupby(group_cols)[uniq_col].nunique().reset_index(name=col_name)
     df = df.merge(tmp, on=group_cols, how='left')
+    del tmp
+    gc.collect()
     return df
 
 def next_click(df, group_cols):
     df["_".join(group_cols)+'_nextClick'] = (df.groupby(group_cols).click_time.shift(-1) - df.click_time).astype(np.float32)
+    gc.collect()
     return df
 
 
 # count agg features
 count_combinations = [
-    ['app'],
-    ['ip'],
-    ['app', 'channel'],
-    ['ip', 'device'],
-    ['ip', 'day'],
-    ['app', 'channel', 'hour'],
-    ['app', 'channel', 'day'],
-    ['app', 'channel', 'day', 'hour']
+    ['app'], # 37
+    ['ip'],  # 4
+    ['ip', 'device'], # 0.53
+    ['app', 'channel'], # 0.51
+    ['app', 'channel', 'day'], # 0.50
+    ['app', 'channel', 'day', 'hour'] # 0.33
 ]
 for i, cols in enumerate(count_combinations):
     print(i, cols)
@@ -66,18 +71,12 @@ for i, cols in enumerate(count_combinations):
 
 # accumulate count agg features
 countAccum_combinations = [
-    ['ip'],
-    ['channel'],
-    ['app'],
-    ['device'],
-    ['app', 'channel'],
-    ['app', 'channel', 'day'],
-    ['channel', 'day', 'hour'],
-    ['device', 'channel', 'day', 'hour'],
-    ['app', 'channel', 'day', 'hour'],
-    ['app', 'device', 'channel', 'day', 'hour'],
-    ['ip', 'day'],
-    ['ip', 'device']
+    ['app'], # 7
+    ['app', 'channel'], # 3.5
+    ['ip'], # 2.5
+    ['device', 'channel', 'day', 'hour'], # 0.59
+    ['app', 'device', 'day', 'hour'], # 0.39
+    ['app', 'channel', 'day', 'hour'] # 0.34
 ]
 for i, cols in enumerate(countAccum_combinations):
     print(i, cols)
@@ -86,16 +85,15 @@ for i, cols in enumerate(countAccum_combinations):
 
 # unique count agg features
 countUniq_combinations = [
-    [['app'], 'ip'],
-    [['app', 'day'], 'ip'],
-    [['app', 'device', 'channel'], 'ip'],
-    [['app', 'hour', 'channel'], 'ip'],
-    [['ip'], 'channel'],
-    [['ip'], 'app'],
-    [['ip'], 'hour'],
-    [['ip'], 'os'],
-    [['app', 'channel', 'hour'], 'os'],
-    [['app', 'channel', 'day', 'hour'], 'os'],
+    [['app'], 'ip'], # 10
+    [['app', 'day'], 'ip'], # 3
+    [['app', 'channel', 'hour'], 'os'], # 2
+    [['ip'], 'channel'], # 1.8
+    [['ip'], 'app'], # 1.5
+    [['app', 'channel', 'day', 'hour'], 'os'], # 1.1
+    [['app', 'device', 'channel'], 'ip'], # 0.77
+    [['ip'], 'hour'], # 0.71
+    [['ip'], 'os'] # 0.45
 ]
 for i, cols in enumerate(countUniq_combinations):
     print(i, cols)
@@ -104,18 +102,17 @@ for i, cols in enumerate(countUniq_combinations):
 
 # next click features
 next_click_combinations = [
-    ['ip'],
-    ['channel'],
-    ['ip', 'device'],
-    ['channel', 'day'],
-    ['app', 'channel'],
-    ['ip', 'app'],
-    ['ip', 'app', 'os'],
-    ['ip', 'app', 'os', 'device'],
-    ['ip', 'app', 'os', 'device', 'channel'],
+    ['app', 'channel'], # 3.3
+    ['ip'], # 1.8
+    ['channel'], # 1.3
+    ['ip', 'device'], # 0.75
+    ['channel', 'day'], # 0.61
+    ['app'] # 0.41
 ]
 for i, cols in enumerate(next_click_combinations):
     print(i, cols)
     df = next_click(df, cols)
 
+print('dumping...')
 df.to_feather('train_features.ftr')
+print('done')
