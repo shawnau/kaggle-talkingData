@@ -14,7 +14,7 @@ dtype = {
 }
 
 print('loading train data...')
-df = pd.read_csv('train_sample.csv', dtype=dtype, usecols=dtype.keys(), parse_dates=['click_time'])
+df = pd.read_csv('data/train.csv', dtype=dtype, usecols=dtype.keys(), parse_dates=['click_time'])
 print('Done')
 
 # times
@@ -25,6 +25,12 @@ df['day'] = df['click_time'].dt.day.astype('uint8')
 df['hour'] = df['click_time'].dt.hour.astype('uint8')
 df['click_time'] = (df['click_time'].astype(np.int64) // 10 ** 9).astype(np.int32)
 print('Done')
+
+# train/valid
+#df = df[df.day != 9]
+df = df[df.day == 9]
+print('dataset: ', df.shape)
+gc.collect()
 
 # features
 def count_agg(df, group_cols):
@@ -113,6 +119,9 @@ for i, cols in enumerate(next_click_combinations):
     print(i, cols)
     df = next_click(df, cols)
 
+del df['click_time']
+gc.collect()
+
 print('dumping...')
-df.to_feather('train_features.ftr')
+df.to_feather('data/valid_features.ftr')
 print('done')

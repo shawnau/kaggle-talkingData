@@ -2,14 +2,7 @@ import numpy as np
 import pandas as pd
 import lightgbm as lgb
 import gc
-
-
-train = pd.read_hdf('train_features.h5', 'train_features')
-valid = pd.read_hdf('valid_features.h5', 'valid_features')
-
-
-print('train: ', train.shape, 'valid: ', valid.shape)
-print('features: ', train.columns)
+from time import gmtime, strftime
 
 
 lgb_params = {
@@ -35,21 +28,34 @@ lgb_params = {
 }
 
 
-features = [x for x in train.columns if x not in ['index', 'click_time', 'is_attributed']]
+features = [
+    'ip', 'app', 'device', 'os', 'channel',
+    'day', 'hour', 'app_count', 'ip_count', 'ip_device_count',
+    'app_channel_count', 'app_channel_day_count',
+    'app_channel_day_hour_count', 'app_countAccum',
+    'app_channel_countAccum', 'ip_countAccum',
+    'device_channel_day_hour_countAccum', 'app_device_day_hour_countAccum',
+    'app_channel_day_hour_countAccum', 'app_uniq_ip_countUniq',
+    'app_day_uniq_ip_countUniq', 'app_channel_hour_uniq_os_countUniq',
+    'ip_uniq_channel_countUniq', 'ip_uniq_app_countUniq',
+    'app_channel_day_hour_uniq_os_countUniq',
+    'app_device_channel_uniq_ip_countUniq', 'ip_uniq_hour_countUniq',
+    'ip_uniq_os_countUniq', 'app_channel_nextClick', 'ip_nextClick',
+    'channel_nextClick', 'ip_device_nextClick', 'channel_day_nextClick',
+    'app_nextClick'
+]
 categorical = ['ip','app', 'device', 'os', 'channel', 'hour']
-respond = 'is_attributed'
 
-xgtrain = lgb.Dataset(train[features].values, 
-                      label=train[respond].values,
+print('loading data')
+xgtrain = lgb.Dataset('data/train_features.bin',
                       feature_name=features,
                       categorical_feature=categorical
                      )
-xgvalid = lgb.Dataset(valid[features].values, 
-                      label=valid[respond].values,
+xgvalid = lgb.Dataset('data/valid_features.bin',
                       feature_name=features,
                       categorical_feature=categorical
                      )
-
+print('done')
 
 params = {
     'learning_rate': 0.05,
@@ -73,9 +79,9 @@ bst = lgb.train(lgb_params,
                  valid_sets=[xgvalid], 
                  valid_names=['valid'], 
                  evals_result=evals_results, 
-                 num_boost_round=70,
+                 num_boost_round=100,
                  early_stopping_rounds=None,
-                 verbose_eval=10, 
+                 verbose_eval=5, 
                  feval=None)
 
 
@@ -83,11 +89,12 @@ print("\nModel Report")
 print("bst1.best_iteration: ", bst.best_iteration)
 print('auc'+":", evals_results['valid']['auc'][bst.best_iteration-1])
 
-
 gain = bst.feature_importance('gain')
 ft = pd.DataFrame({'feature':bst.feature_name(), 'split':bst.feature_importance('split'), 'gain':100 * gain / gain.sum()}).sort_values('gain', ascending=False)
-ft.to_csv('nextClick_importance.csv',index=False)
+ft.to_csv('feature_importance.csv',index=False)
+print(ft)
 
 
-
-
+model_name = 'data/model-%s'%strftime("%Y-%m-%d-%H-%M-%S", gmtime())
+bst.save_model(model_name)
+print('model saved as %s'%model_name)
