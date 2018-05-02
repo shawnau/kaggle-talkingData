@@ -9,13 +9,13 @@ lgb_params = {
     'boosting_type': 'gbdt',
     'objective': 'binary',
     'metric': 'auc',
-    'learning_rate': 0.07,
+    'learning_rate': 0.1,
     #'is_unbalance': 'true',  #because training data is unbalance (replaced with scale_pos_weight)
-    'num_leaves': 32,  # we should let it be smaller than 2^(max_depth)
-    'max_depth': 5,  # -1 means no limit
-    'min_child_samples': 20,  # Minimum number of data need in a child(min_data_in_leaf)
-    'max_bin': 255,  # Number of bucketed bin for feature values
-    'subsample': 0.6,  # Subsample ratio of the training instance.
+    'num_leaves': 7,  # we should let it be smaller than 2^(max_depth)
+    'max_depth': 4,  # -1 means no limit
+    'min_child_samples': 100,  # Minimum number of data need in a child(min_data_in_leaf)
+    'max_bin': 100,  # Number of bucketed bin for feature values
+    'subsample': 0.7,  # Subsample ratio of the training instance.
     'subsample_freq': 1,  # frequence of subsample, <=0 means no enable
     'colsample_bytree': 0.7,  # Subsample ratio of columns when constructing each tree.
     'min_child_weight': 5,  # Minimum sum of instance weight(hessian) needed in a child(leaf)
@@ -61,7 +61,7 @@ bst = lgb.train(lgb_params,
                  valid_names=['train', 'valid'], 
                  evals_result=evals_results, 
                  num_boost_round=1000,
-                 early_stopping_rounds=50,
+                 early_stopping_rounds=20,
                  verbose_eval=10, 
                  feval=None)
 
@@ -71,7 +71,7 @@ print('auc'+":", evals_results['valid']['auc'][bst.best_iteration-1])
 
 gain = bst.feature_importance('gain')
 ft = pd.DataFrame({'feature':bst.feature_name(), 'split':bst.feature_importance('split'), 'gain':100 * gain / gain.sum()}).sort_values('gain', ascending=False)
-ft.to_csv('feature_importance.csv',index=False)
+ft.to_csv('feature_importance_03.csv',index=False)
 print(ft)
 
 model_name = 'data/model-%s'%strftime("%Y-%m-%d-%H-%M-%S", gmtime())
