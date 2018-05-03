@@ -120,8 +120,8 @@ submit['click_id'] = test_df['click_id']
 y = train_df.is_attributed.values
 
 # split up into train and test
-train_df = train_df.iloc[:train_df.shape[0]]
-test_df = train_df.iloc[train_df.shape[0]:]
+train_df = all_df.iloc[:train_df.shape[0]]
+test_df = all_df.iloc[train_df.shape[0]:]
 gc.collect()
 
 metrics = 'auc'
