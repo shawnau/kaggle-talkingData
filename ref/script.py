@@ -4,6 +4,7 @@
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import time
+from time import gmtime, strftime
 import numpy as np
 import lightgbm as lgb
 import os
@@ -14,7 +15,7 @@ opt_rounds = 680
 
 output_file = 'lgbm_submit.csv'
 
-path = "../input/"
+path = "../data/"
 
 dtypes = {
     'ip'		:'uint32',
@@ -32,7 +33,7 @@ train_cols = ['ip', 'app', 'device', 'os', 'channel', 'is_attributed', 'click_ti
 train_df = pd.read_csv(path + 'train.csv', skiprows=range(1,84903891), nrows=100000000, dtype=dtypes, usecols=train_cols)
 #train_df = pd.read_csv(path + 'train.csv', dtype=dtypes, usecols=train_cols)
 
-print('Load test.csv...')
+print('Loading test.csv...')
 test_cols = ['ip', 'app', 'device', 'os', 'click_time', 'channel', 'click_id']
 test_df = pd.read_csv(path + "test.csv", dtype=dtypes, usecols=test_cols)
 
@@ -130,7 +131,7 @@ lgb_params = {
 	'boosting_type': 'gbdt',
 	'objective': 'binary',
 	'metric': metrics,
-	'learning_rate': .1,
+	'learning_rate': .07,
 	'num_leaves': 7,
 	'max_depth': 4,
 	'min_child_samples': 100,
@@ -196,6 +197,15 @@ print(metrics+':', evals_results['valid'][metrics][n_estimators-1])
 del xgvalid
 del xgtrain
 gc.collect()
+
+gain = model.feature_importance('gain')
+ft = pd.DataFrame({'feature':model.feature_name(), 'split':model.feature_importance('split'), 'gain':100 * gain / gain.sum()}).sort_values('gain', ascending=False)
+ft.to_csv('feature_importance_ref.csv',index=False)
+print(ft)
+
+model_name = 'data/model-%s'%strftime("%Y-%m-%d-%H-%M-%S", gmtime())
+model.save_model(model_name)
+print('model saved as %s'%model_name)
 
 
 print('Predicting...')

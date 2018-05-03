@@ -26,6 +26,7 @@ df['day'] = df['click_time'].dt.day.astype('uint8')
 df['hour'] = df['click_time'].dt.hour.astype('uint8')
 df['click_time'] = (df['click_time'].astype(np.int64) // 10 ** 9).astype(np.int32)
 print('Done')
+gc.collect()
 
 # train/valid
 df = df[df.day != 9]
