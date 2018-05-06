@@ -180,7 +180,7 @@ lgb_params = {
     'objective': 'binary',
     'metric': 'auc',
     'learning_rate': 0.1,
-    'num_leaves': 7,
+    'num_leaves': 8,
     'max_depth': 4,
     'min_child_samples': 100,
     'max_bin': 100,
@@ -272,7 +272,7 @@ xgb_params = {'eta': 0.1,
               'grow_policy': "lossguide",
               'max_leaves': 1400,
               'max_depth': 4,
-              'subsample': 0.9,
+              'subsample': 0.7,
               'colsample_bytree': 0.7,
               'colsample_bylevel':0.7,
               'min_child_weight':0,
@@ -291,10 +291,10 @@ watchlist = [(dvalid, 'valid')]
 
 xgb_model = xgb.train(xgb_params,
                       dtrain,
-                      num_boost_round=2000,
+                      num_boost_round=5000,
                       evals=watchlist,
                       maximize=True,
-                      early_stopping_rounds = 50,
+                      early_stopping_rounds = 100,
                       verbose_eval=5)
 
 model_name = 'xgb-model-%s' % strftime("%Y-%m-%d-%H-%M-%S", gmtime())
