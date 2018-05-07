@@ -151,12 +151,12 @@ dtype = {
     'is_attributed': 'uint8',
     'click_id': 'uint32',
 }
-
+print('loading train.csv')
 # train: (184903890, 7)
 # test: (18790469, 7)
 train_cols = ['ip', 'app', 'device', 'os', 'channel', 'click_time', 'is_attributed']
 train_df = pd.read_csv('data/train.csv', dtype=dtype, usecols=train_cols, parse_dates=['click_time'])
-
+print('loading test.csv')
 test_cols = ['ip', 'app', 'device', 'os', 'channel', 'click_time', 'click_id']
 # using test_supplement
 test_df = pd.read_csv('data/test_supplement.csv', dtype=dtype, usecols=test_cols, parse_dates=['click_time'])
@@ -179,7 +179,7 @@ lgb_params = {
     'boosting_type': 'gbdt',
     'objective': 'binary',
     'metric': 'auc',
-    'learning_rate': 0.1,
+    'learning_rate': 0.08,
     'num_leaves': 8,
     'max_depth': 4,
     'min_child_samples': 100,
@@ -260,14 +260,14 @@ test = test.merge(test_df[all_cols], how='left', on=join_cols)
 test = test.drop_duplicates(subset=['click_id'])
 
 print("Writing the submission data into a csv file...")
-test[['click_id', 'is_attributed']].to_csv('submit_lgb_%s_%s.gz'%(model.best_iteration, ), index=False, float_format='%.9f', compression='gzip')
+test[['click_id', 'is_attributed']].to_csv('submit_lgb_%s.gz'%(model.best_iteration), index=False, float_format='%.9f', compression='gzip')
 print("All done...")
 
 del test
 gc.collect()
 
 ########################### train XGB ###########################
-xgb_params = {'eta': 0.1,
+xgb_params = {'eta': 0.08,
               'tree_method': "hist",
               'grow_policy': "lossguide",
               'max_leaves': 1400,
@@ -317,3 +317,4 @@ test = test.drop_duplicates(subset=['click_id'])
 print("Writing the submission data into a csv file...")
 test[['click_id', 'is_attributed']].to_csv('submit_xgb_%s_%s.gz' % (xgb_model.best_ntree_limit, xgb_model.best_score), index=False, float_format='%.9f', compression='gzip')
 print("All done...")
+
