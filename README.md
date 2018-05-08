@@ -1,5 +1,5 @@
-# Kaggle TalkingData AdTracking Fraud Detection Challenge 48th Solution
-https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection
+# Kaggle TalkingData AdTracking Fraud Detection Challenge 
+48th Solution, competition link: https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection
 
 1. [features.ipynb](https://github.com/shawnau/talkingData/blob/master/features.ipynb): notebook version
 2. [train_xgb_lgb.py](https://github.com/shawnau/talkingData/blob/master/train_lgb_xgb.py): script version, gives about 0.9824 on private LB
@@ -13,3 +13,6 @@ https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection
 3. [6th, strong single lightGBM](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion)
 4. [9th](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56279#latest-325405)
 5. [FFM trick](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56282)
+
+## Train log
+please see the [dashboard](https://github.com/shawnau/talkingData/projects/1)
