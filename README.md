@@ -6,6 +6,8 @@
 3. blending.ipynb: blending historical models, which boost me about 0.0002
 4. FTRL.ipynb: haven't tried due to limited time
 
+**running this code on full training data needs 96GB RAM with 128G swap**
+
 ## Some Solutions as a Reference
 
 1. [3th, NN model](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56262#latest-325349)
